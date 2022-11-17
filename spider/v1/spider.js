@@ -23,16 +23,13 @@ function download (url, filename) {
 }
 
 function spiderLinks (currentUrl, content, nesting) {
-  let promise = Promise.resolve()
   if (nesting === 0) {
-    return promise
+    return Promise.resolve()
   }
   const links = getPageLinks(currentUrl, content)
-  for (const link of links) {
-    promise = promise.then(() => spider(link, nesting - 1))
-  }
+  const promises = links.map(link => spider(link, nesting - 1))
 
-  return promise
+  return Promise.all(promises)
 }
 
 export function spider (url, nesting) {
@@ -44,7 +41,7 @@ export function spider (url, nesting) {
       }
 
       // The file doesn't exist, so let’s download it
-      return download(url, filename)
+      return download(url, './results' + filename)
     })
     .then(content => spiderLinks(url, content, nesting))
 }
